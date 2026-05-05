@@ -2,13 +2,14 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
 st.set_page_config(page_title="Ames Housing Market", page_icon="🏠", layout="wide")
 
 st.title("🏠 Ames Housing Market Analysis")
 st.markdown("An interactive dashboard exploring house prices in Ames, Iowa.")
 
-df = pd.read_csv('house_prices_cleaned.csv')
+df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'house_prices_cleaned.csv'))
 st.write(f"Dataset contains **{df.shape[0]} houses** and **{df.shape[1]} features**")
 
 # Sidebar filters
