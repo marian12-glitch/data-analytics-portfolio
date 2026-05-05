@@ -2,13 +2,30 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
+from sqlalchemy import create_engine
+from urllib.parse import quote_plus
+from dotenv import load_dotenv
+
+
 
 st.set_page_config(page_title="Ames Housing Market", page_icon="🏠", layout="wide")
 
 st.title("🏠 Ames Housing Market Analysis")
 st.markdown("An interactive dashboard exploring house prices in Ames, Iowa.")
 
-df = pd.read_csv('house_prices_cleaned.csv')
+#df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'house_prices_cleaned.csv'))
+load_dotenv()
+try:
+    password = quote_plus(st.secrets["SUPABASE_PASSWORD"])
+except:
+    from dotenv import load_dotenv
+    load_dotenv()
+    password = quote_plus(os.environ.get('SUPABASE_PASSWORD', ''))
+engine = create_engine(f'postgresql://postgres.mxntufrxvtvhsakzlthv:{password}@aws-1-us-west-2.pooler.supabase.com:5432/postgres')
+
+df = pd.read_sql('SELECT * FROM house_prices', engine)
+
 st.write(f"Dataset contains **{df.shape[0]} houses** and **{df.shape[1]} features**")
 
 # Sidebar filters
