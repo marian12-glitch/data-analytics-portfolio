@@ -1,17 +1,14 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import os
+import plotly.graph_objects as go
 
-#st.write("App is running!")
-#st.write(os.getcwd())
+st.set_page_config(page_title="Ames Housing Market", page_icon="🏠", layout="wide")
 
-st.title("Ames Housing Market Analysis")
-
+st.title("🏠 Ames Housing Market Analysis")
 st.markdown("An interactive dashboard exploring house prices in Ames, Iowa.")
 
 df = pd.read_csv('house_prices_cleaned.csv')
-
 st.write(f"Dataset contains **{df.shape[0]} houses** and **{df.shape[1]} features**")
 
 # Sidebar filters
@@ -20,31 +17,9 @@ st.sidebar.header("Filters")
 neighborhoods = ['All'] + sorted(df['Neighborhood'].unique().tolist())
 selected_neighborhood = st.sidebar.selectbox("Select Neighborhood", neighborhoods)
 
-# Filter dataframe based on selection
-if selected_neighborhood == 'All':
-    filtered_df = df
-else:
-    filtered_df = df[df['Neighborhood'] == selected_neighborhood]
-
-st.write(f"Showing **{len(filtered_df)} houses**")
-
-st.subheader("Price Distribution")
-
-fig1 = px.histogram(
-    filtered_df,
-    x='SalePrice',
-    nbins=50,
-    title=f'Sale Price Distribution — {selected_neighborhood}',
-    labels={'SalePrice': 'Sale Price ($)'},
-    color_discrete_sequence=['#1F4E79']
-)
-st.plotly_chart(fig1, use_container_width=True)
-
-# Price range slider
 st.sidebar.subheader("Price Range")
 min_price = int(df['SalePrice'].min())
 max_price = int(df['SalePrice'].max())
-
 price_range = st.sidebar.slider(
     "Select Price Range",
     min_value=min_price,
@@ -52,7 +27,12 @@ price_range = st.sidebar.slider(
     value=(min_price, max_price)
 )
 
-# Apply price filter
+# Apply filters
+if selected_neighborhood == 'All':
+    filtered_df = df
+else:
+    filtered_df = df[df['Neighborhood'] == selected_neighborhood]
+
 filtered_df = filtered_df[
     (filtered_df['SalePrice'] >= price_range[0]) &
     (filtered_df['SalePrice'] <= price_range[1])
@@ -126,3 +106,25 @@ fig5 = px.line(
     color_discrete_sequence=['#1F4E79']
 )
 st.plotly_chart(fig5, use_container_width=True)
+
+# Key Insights
+st.subheader("📊 Key Business Insights")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("Most Expensive Neighbourhood", "NridgHt", "$315,000 median")
+
+with col2:
+    st.metric("Least Expensive Neighbourhood", "MeadowV", "$88,000 median")
+
+with col3:
+    st.metric("Price Difference", "$227,000", "between best and worst")
+
+st.markdown("""
+**Key Findings:**
+- Overall quality is the strongest predictor of sale price (correlation: 0.79)
+- Neighbourhood alone can account for over 227k difference in price
+- Newer houses command higher prices — negative correlation with age
+- House prices peaked in 2007 before declining due to the 2008 financial crisis
+""")
